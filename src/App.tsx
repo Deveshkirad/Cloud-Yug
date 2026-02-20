@@ -4,17 +4,17 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  History, 
-  Lightbulb, 
-  Target, 
-  Settings as SettingsIcon, 
-  Bell, 
-  Search, 
-  Bolt, 
-  User, 
-  Shield, 
+import {
+  LayoutDashboard,
+  History,
+  Lightbulb,
+  Target,
+  Settings as SettingsIcon,
+  Bell,
+  Search,
+  Bolt,
+  User,
+  Shield,
   ArrowRight,
   Clock,
   Moon,
@@ -29,9 +29,11 @@ import {
   Brain,
   TrendingUp,
   TrendingDown,
-  Info
+  Info,
+  Activity as ActivityIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import FatigueTracker from './components/FatigueTracker';
 
 // --- Types ---
 interface Settings {
@@ -81,16 +83,15 @@ interface Stats {
 // --- Components ---
 
 const NavItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
-  <button 
+  <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all relative ${
-      active ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-    }`}
+    className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all relative ${active ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+      }`}
   >
     <Icon size={18} />
     {label}
     {active && (
-      <motion.div 
+      <motion.div
         layoutId="nav-underline"
         className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
       />
@@ -99,13 +100,12 @@ const NavItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: str
 );
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
-  <button 
+  <button
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full text-left ${
-      active 
-        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 font-bold' 
-        : 'text-slate-600 hover:bg-slate-100'
-    }`}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full text-left ${active
+      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 font-bold'
+      : 'text-slate-600 hover:bg-slate-100'
+      }`}
   >
     <Icon size={20} />
     <span>{label}</span>
@@ -113,16 +113,14 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label:
 );
 
 const Toggle = ({ checked, onChange }: { checked: boolean, onChange: (val: boolean) => void }) => (
-  <button 
+  <button
     onClick={() => onChange(!checked)}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-      checked ? 'bg-blue-600' : 'bg-slate-300'
-    }`}
+    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-blue-600' : 'bg-slate-300'
+      }`}
   >
     <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-        checked ? 'translate-x-6' : 'translate-x-1'
-      }`}
+      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'
+        }`}
     />
   </button>
 );
@@ -176,10 +174,10 @@ const InsightsPage = ({ stats }: { stats: Stats | null }) => {
           <div className="relative flex items-center justify-center size-44 mb-8">
             <svg className="size-full" viewBox="0 0 100 100">
               <circle className="text-slate-100" cx="50" cy="50" fill="none" r="45" stroke="currentColor" strokeWidth="10"></circle>
-              <motion.circle 
-                className="text-blue-600" 
-                cx="50" cy="50" fill="none" r="45" 
-                stroke="currentColor" 
+              <motion.circle
+                className="text-blue-600"
+                cx="50" cy="50" fill="none" r="45"
+                stroke="currentColor"
                 strokeWidth="10"
                 strokeLinecap="round"
                 initial={{ strokeDashoffset: 282.7 }}
@@ -221,7 +219,7 @@ const InsightsPage = ({ stats }: { stats: Stats | null }) => {
             <div className="flex justify-between w-full items-end h-48 px-2">
               {[70, 50, 85, 40, 65, 95, 60].map((h, i) => (
                 <div key={i} className="flex flex-col items-center gap-4 w-10">
-                  <motion.div 
+                  <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${h}%` }}
                     className="w-3 bg-blue-600 rounded-full relative"
@@ -246,7 +244,7 @@ const InsightsPage = ({ stats }: { stats: Stats | null }) => {
                   <span className="text-emerald-600">+{r.val}%</span>
                 </div>
                 <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${r.val}%` }}
                     className="h-full bg-blue-600 rounded-full"
@@ -367,9 +365,8 @@ const GoalsPage = ({ settings }: { settings: Settings | null }) => {
                 </div>
                 <div className="flex gap-2 mt-8">
                   {['Quiet', 'Balanced', 'Active'].map(s => (
-                    <button key={s} className={`flex-1 py-3 text-[10px] font-bold rounded-xl border transition-colors uppercase tracking-wider ${
-                      settings.alert_sensitivity === s ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 hover:bg-slate-50'
-                    }`}>
+                    <button key={s} className={`flex-1 py-3 text-[10px] font-bold rounded-xl border transition-colors uppercase tracking-wider ${settings.alert_sensitivity === s ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 hover:bg-slate-50'
+                      }`}>
                       {s}
                     </button>
                   ))}
@@ -576,7 +573,7 @@ const Dashboard = ({ stats }: { stats: Stats | null }) => {
             {/* Mock Chart Bars */}
             {[40, 60, 45, 80, 55, 90, 70].map((h, i) => (
               <div key={i} className="w-8 bg-blue-600/20 rounded-t-lg relative group">
-                <motion.div 
+                <motion.div
                   initial={{ height: 0 }}
                   animate={{ height: `${h}%` }}
                   className="w-full bg-blue-600 rounded-t-lg"
@@ -610,7 +607,7 @@ const Dashboard = ({ stats }: { stats: Stats | null }) => {
               <div key={i} className="flex items-center gap-4">
                 <span className="text-[10px] font-bold text-slate-400 w-10">{d.time}</span>
                 <div className="h-3 flex-1 bg-slate-100 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${d.val}%` }}
                     className={`h-full rounded-full ${d.val > 80 ? 'bg-blue-600' : 'bg-blue-600/40'}`}
@@ -678,23 +675,21 @@ const HistoryPage = ({ activities, events }: { activities: Activity[], events: E
           <div className="relative pl-12 before:content-[''] before:absolute before:left-5 before:top-0 before:bottom-0 before:w-0.5 before:bg-slate-200 space-y-10">
             {activities.map((activity) => (
               <div key={activity.id} className="relative">
-                <div className={`absolute -left-[32px] top-4 size-10 rounded-full bg-white border-4 z-10 flex items-center justify-center shadow-sm ${
-                  activity.type === 'FOCUS_BLOCK' ? 'border-green-500 text-green-500' : 
+                <div className={`absolute -left-[32px] top-4 size-10 rounded-full bg-white border-4 z-10 flex items-center justify-center shadow-sm ${activity.type === 'FOCUS_BLOCK' ? 'border-green-500 text-green-500' :
                   activity.type === 'HIGH_DISTRACTION' ? 'border-amber-500 text-amber-500' : 'border-blue-500 text-blue-500'
-                }`}>
-                  {activity.type === 'FOCUS_BLOCK' ? <Brain size={20} /> : 
-                   activity.type === 'HIGH_DISTRACTION' ? <AlertTriangle size={20} /> : <Moon size={20} />}
+                  }`}>
+                  {activity.type === 'FOCUS_BLOCK' ? <Brain size={20} /> :
+                    activity.type === 'HIGH_DISTRACTION' ? <AlertTriangle size={20} /> : <Moon size={20} />}
                 </div>
                 <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`text-[10px] font-extrabold px-2 py-1 rounded shadow-sm uppercase tracking-wider ${
-                      activity.type === 'FOCUS_BLOCK' ? 'text-green-600 bg-green-50' : 
+                    <span className={`text-[10px] font-extrabold px-2 py-1 rounded shadow-sm uppercase tracking-wider ${activity.type === 'FOCUS_BLOCK' ? 'text-green-600 bg-green-50' :
                       activity.type === 'HIGH_DISTRACTION' ? 'text-amber-600 bg-amber-50' : 'text-blue-600 bg-blue-50'
-                    }`}>
+                      }`}>
                       {activity.type.replace('_', ' ')}
                     </span>
                     <span className="text-sm font-bold text-slate-400">
-                      {new Date(activity.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                      {new Date(activity.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
                       {new Date(activity.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -728,10 +723,9 @@ const HistoryPage = ({ activities, events }: { activities: Activity[], events: E
                     {new Date(event.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
                   <div>
-                    <p className={`font-bold ${
-                      event.event_type.includes('SPIKE') || event.event_type.includes('ATTEMPT') ? 'text-amber-600' : 
+                    <p className={`font-bold ${event.event_type.includes('SPIKE') || event.event_type.includes('ATTEMPT') ? 'text-amber-600' :
                       event.event_type.includes('ACHIEVED') ? 'text-green-600' : 'text-blue-600'
-                    }`}>{event.event_type}</p>
+                      }`}>{event.event_type}</p>
                     <p className="text-slate-500 mt-1">{event.message}</p>
                   </div>
                 </div>
@@ -766,12 +760,12 @@ const SettingsPage = ({ settings, onSave }: { settings: Settings | null, onSave:
       <aside className="w-full lg:w-64 shrink-0">
         <div className="flex flex-col gap-1 sticky top-24">
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 px-4 mb-3">Preferences</h3>
-          <SidebarItem icon={User} label="Profile Settings" active={true} onClick={() => {}} />
-          <SidebarItem icon={Bell} label="Notifications" active={false} onClick={() => {}} />
-          <SidebarItem icon={Target} label="Focus Rules" active={false} onClick={() => {}} />
-          <SidebarItem icon={Bolt} label="Integrations" active={false} onClick={() => {}} />
-          <SidebarItem icon={Shield} label="Account Security" active={false} onClick={() => {}} />
-          
+          <SidebarItem icon={User} label="Profile Settings" active={true} onClick={() => { }} />
+          <SidebarItem icon={Bell} label="Notifications" active={false} onClick={() => { }} />
+          <SidebarItem icon={Target} label="Focus Rules" active={false} onClick={() => { }} />
+          <SidebarItem icon={Bolt} label="Integrations" active={false} onClick={() => { }} />
+          <SidebarItem icon={Shield} label="Account Security" active={false} onClick={() => { }} />
+
           <div className="mt-8 px-4 py-4 bg-blue-600/10 rounded-2xl border border-blue-600/20">
             <p className="text-xs font-bold text-blue-600 uppercase mb-1">Current Plan</p>
             <p className="text-sm font-bold">Premium Annual</p>
@@ -805,29 +799,29 @@ const SettingsPage = ({ settings, onSave }: { settings: Settings | null, onSave:
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
-              <input 
-                type="text" 
-                value={localSettings.full_name} 
+              <input
+                type="text"
+                value={localSettings.full_name}
                 onChange={(e) => update('full_name', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <input 
-                type="email" 
-                value={localSettings.email} 
+              <input
+                type="email"
+                value={localSettings.email}
                 onChange={(e) => update('email', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-bold text-slate-700 ml-1">Professional Role</label>
-              <input 
-                type="text" 
-                value={localSettings.role} 
+              <input
+                type="text"
+                value={localSettings.role}
                 onChange={(e) => update('role', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
               />
               <p className="text-xs text-slate-400 ml-1">This helps us tailor focus intervals to your specific work type.</p>
             </div>
@@ -858,9 +852,9 @@ const SettingsPage = ({ settings, onSave }: { settings: Settings | null, onSave:
                     <p className="text-sm text-slate-500">{rule.desc}</p>
                   </div>
                 </div>
-                <Toggle 
-                  checked={!!(localSettings as any)[rule.key]} 
-                  onChange={(val) => update(rule.key as any, val ? 1 : 0)} 
+                <Toggle
+                  checked={!!(localSettings as any)[rule.key]}
+                  onChange={(val) => update(rule.key as any, val ? 1 : 0)}
                 />
               </div>
             ))}
@@ -874,7 +868,7 @@ const SettingsPage = ({ settings, onSave }: { settings: Settings | null, onSave:
           </div>
           <div className="flex gap-4">
             <button className="px-6 py-2.5 rounded-xl border border-slate-700 font-bold hover:bg-slate-800 transition-colors">Discard</button>
-            <button 
+            <button
               onClick={() => onSave(localSettings)}
               className="px-8 py-2.5 rounded-xl bg-blue-600 text-white font-black hover:scale-105 transition-transform"
             >
@@ -962,6 +956,7 @@ export default function App() {
               <NavItem icon={LayoutDashboard} label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} />
               <NavItem icon={History} label="History" active={activeTab === 'History'} onClick={() => setActiveTab('History')} />
               <NavItem icon={Lightbulb} label="Insights" active={activeTab === 'Insights'} onClick={() => setActiveTab('Insights')} />
+              <NavItem icon={ActivityIcon} label="Fatigue CV" active={activeTab === 'FatigueTracker'} onClick={() => setActiveTab('FatigueTracker')} />
               <NavItem icon={Target} label="Goals" active={activeTab === 'Goals'} onClick={() => setActiveTab('Goals')} />
               <NavItem icon={SettingsIcon} label="Settings" active={activeTab === 'Settings'} onClick={() => setActiveTab('Settings')} />
             </nav>
@@ -994,6 +989,7 @@ export default function App() {
             {activeTab === 'History' && <HistoryPage activities={activities} events={events} />}
             {activeTab === 'Settings' && <SettingsPage settings={settings} onSave={handleSaveSettings} />}
             {activeTab === 'Insights' && <InsightsPage stats={stats} />}
+            {activeTab === 'FatigueTracker' && <FatigueTracker />}
             {activeTab === 'Goals' && <GoalsPage settings={settings} />}
           </motion.div>
         </AnimatePresence>

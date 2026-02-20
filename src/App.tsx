@@ -121,7 +121,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 flex flex-col font-sans transition-colors">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} stats={stats} isExtensionPopup={isExtensionPopup} openFullDashboard={openFullDashboard} />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-10">
+      <main className="flex-1 w-full mx-auto p-6 md:p-10" style={{maxWidth: isExtensionPopup ? '100%' : '90rem'}}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

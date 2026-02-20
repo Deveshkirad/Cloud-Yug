@@ -32,6 +32,7 @@ import {
   Info,
   Activity as ActivityIcon
 } from 'lucide-react';
+import { storageService } from './storage.js';
 import { motion, AnimatePresence } from 'motion/react';
 import FatigueTracker from './components/FatigueTracker';
 
@@ -748,8 +749,12 @@ const SettingsPage = ({ settings, onSave }: { settings: Settings | null, onSave:
   useEffect(() => {
     setLocalSettings(settings);
   }, [settings]);
+// Import types
+import { Settings, Activity, EventLog, Stats } from './types';
 
-  if (!localSettings) return null;
+// Import components
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 
   const update = (key: keyof Settings, val: any) => {
     setLocalSettings({ ...localSettings, [key]: val });
@@ -880,6 +885,15 @@ const SettingsPage = ({ settings, onSave }: { settings: Settings | null, onSave:
     </div>
   );
 };
+// Import pages
+import { Dashboard } from './pages/Dashboard';
+import { HistoryPage } from './pages/HistoryPage';
+import { InsightsPage } from './pages/InsightsPage';
+import { GoalsPage } from './pages/GoalsPage';
+import { SettingsPage } from './pages/SettingsPage';
+
+// Type declarations for Chrome extension API
+declare const chrome: any;
 
 // --- Main App ---
 
@@ -891,19 +905,43 @@ export default function App() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Initialize dark mode from localStorage
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode && JSON.parse(savedDarkMode)) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  // Check if we're in extension popup context (small width)
+  const isExtensionPopup = typeof window !== 'undefined' && window.innerWidth <= 500;
+  
+  // Function to open full dashboard
+  const openFullDashboard = () => {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
+      // Extension context - open options page
+      chrome.tabs.create({ url: chrome.runtime.getURL('options.html') });
+    } else {
+      // Web context - open in new window
+      window.open(window.location.href, '_blank', 'width=1200,height=800');
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sRes, aRes, eRes, stRes] = await Promise.all([
-          fetch('/api/settings'),
-          fetch('/api/activities'),
-          fetch('/api/events'),
-          fetch('/api/stats')
+        // Fetch data from chrome.storage instead of API
+        const [settingsData, activitiesData, eventsData, statsData] = await Promise.all([
+          storageService.getSettings(),
+          storageService.getActivities(),
+          storageService.getEvents(),
+          storageService.getStats()
         ]);
-        setSettings(await sRes.json());
-        setActivities(await aRes.json());
-        setEvents(await eRes.json());
-        setStats(await stRes.json());
+        
+        if (settingsData) setSettings(settingsData);
+        setActivities(activitiesData);
+        setEvents(eventsData);
+        if (statsData) setStats(statsData);
       } catch (err) {
         console.error("Failed to fetch data", err);
       } finally {
@@ -911,15 +949,27 @@ export default function App() {
       }
     };
     fetchData();
+    
+    // Listen for storage changes
+    storageService.addChangeListener((changes) => {
+      if (changes.settings) {
+        setSettings(changes.settings.newValue);
+      }
+      if (changes.activities) {
+        setActivities(changes.activities.newValue || []);
+      }
+      if (changes.events) {
+        setEvents(changes.events.newValue || []);
+      }
+      if (changes.stats) {
+        setStats(changes.stats.newValue);
+      }
+    });
   }, []);
 
   const handleSaveSettings = async (newSettings: Settings) => {
     try {
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSettings)
-      });
+      await storageService.updateSettings(newSettings);
       setSettings(newSettings);
       alert("Settings saved successfully!");
     } catch (err) {
@@ -929,10 +979,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 transition-colors">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-500 font-bold animate-pulse">Initializing Focus Recovery...</p>
+          <p className="text-slate-500 dark:text-slate-400 font-bold animate-pulse">Initializing Focus Recovery...</p>
         </div>
       </div>
     );
@@ -975,6 +1025,8 @@ export default function App() {
           </div>
         </div>
       </header>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 flex flex-col font-sans transition-colors">
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} stats={stats} isExtensionPopup={isExtensionPopup} openFullDashboard={openFullDashboard} />
 
       <main className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-10">
         <AnimatePresence mode="wait">
@@ -986,7 +1038,7 @@ export default function App() {
             transition={{ duration: 0.2 }}
           >
             {activeTab === 'Dashboard' && <Dashboard stats={stats} />}
-            {activeTab === 'History' && <HistoryPage activities={activities} events={events} />}
+            {activeTab === 'History' && <HistoryPage activities={activities} events={events} stats={stats} />}
             {activeTab === 'Settings' && <SettingsPage settings={settings} onSave={handleSaveSettings} />}
             {activeTab === 'Insights' && <InsightsPage stats={stats} />}
             {activeTab === 'FatigueTracker' && <FatigueTracker />}
@@ -995,21 +1047,7 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="w-full max-w-7xl mx-auto px-10 pb-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-200 pt-8">
-          <div className="flex items-center gap-2">
-            <Bolt size={16} className="text-blue-600" />
-            <p className="text-xs font-medium text-slate-400">© 2024 Focus Recovery System. Optimized for Performance.</p>
-          </div>
-          <div className="flex items-center gap-6">
-            <a className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors" href="#">Privacy Policy</a>
-            <a className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors" href="#">Support Center</a>
-            <a className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors" href="#">System Status</a>
-            <span className="text-[10px] font-bold text-slate-300 bg-slate-100 px-2 py-0.5 rounded">v2.4.0-pro</span>
-          </div>
-        </div>
-      </footer>
-
+      <Footer />
     </div>
   );
 }
